@@ -1,0 +1,287 @@
+import {
+  AtelierLocation,
+  BespokeSuit,
+  ClothSwatch,
+  FittingService,
+  MasterCutter,
+} from '../types/tailor';
+
+export const HOUSE_IMAGES = {
+  heroSuit: '/src/assets/images/hero_bespoke_suit_1795447609489.jpg',
+  midnightTuxedo: '/src/assets/images/suit_midnight_tuxedo_1795447608917.jpg',
+  espressoFlannel: '/src/assets/images/suit_espresso_flannel_1795447610902.jpg',
+  obsidianDb: '/src/assets/images/suit_obsidian_db_1795447611195.jpg',
+  slateHerringbone: '/src/assets/images/suit_slate_herringbone_1795447609965.jpg',
+  atelierHands: '/src/assets/images/atelier_craft_hands_1795447610945.jpg',
+} as const;
+
+export const SUIT_PORTFOLIO: BespokeSuit[] = [
+  {
+    id: 'savile-charcoal-6x2',
+    name: 'The Savile Charcoal 6x2',
+    subtitle: 'House Flagship Double-Breasted Commission',
+    category: 'Double-Breasted',
+    image: HOUSE_IMAGES.heroSuit,
+    aspect: '16:9',
+    mill: 'Holland & Sherry',
+    cloth: 'Super 150s Worsted Flannel',
+    weightGsm: 340,
+    tailoringHours: 78,
+    startingPriceGbp: 5400,
+    silhouette: 'Structured Savile drape with roped shoulder and suppressed waist',
+    construction: 'Full floating horsehair canvas, hand-padded collar and lapels',
+    details: [
+      '4.25-inch sweeping peak lapels with Milanese silk buttonhole',
+      'Hand-turned buffalo horn buttons and cupro Bemberg lining',
+      'Double forward-pleated trousers with side-tab waist adjusters',
+      'Three basted and forward fittings over nine weeks',
+    ],
+    story:
+      'Cut in our Mayfair cutting room for evening boardrooms and winter travel, this six-on-two silhouette balances commanding chest breadth against a tapered, clean back line.',
+    commissionYear: '2026',
+  },
+  {
+    id: 'brera-midnight-tuxedo',
+    name: 'The Brera Midnight Dinner Jacket',
+    subtitle: 'Velvet & Grosgrain Evening Commission',
+    category: 'Black Tie',
+    image: HOUSE_IMAGES.midnightTuxedo,
+    aspect: '3:4',
+    mill: 'Loro Piana',
+    cloth: 'Midnight Silk-Cotton Velvet',
+    weightGsm: 360,
+    tailoringHours: 74,
+    startingPriceGbp: 5850,
+    silhouette: 'Single-button sculpted evening cut with deep V-opening',
+    construction: 'Ultra-light floating canvas with hand-felled silk grosgrain facings',
+    details: [
+      'Silk grosgrain peak lapels cut in one continuous sweep',
+      'Silk-covered single link button closure and jetted pockets',
+      'High-waisted obsidian barathea trousers with single silk braid',
+      'Hand-stitched internal monogram in burnished gold silk',
+    ],
+    story:
+      'Designed to absorb tungsten and candlelight rather than reflect harsh flash, the midnight pile shifts from obsidian to deep ink-blue as the wearer moves.',
+    commissionYear: '2026',
+  },
+  {
+    id: 'torino-espresso-three-piece',
+    name: 'The Torino Chalk-Stripe Three-Piece',
+    subtitle: 'Brushed Espresso Flannel & Lapelled Waistcoat',
+    category: 'Three-Piece',
+    image: HOUSE_IMAGES.espressoFlannel,
+    aspect: '3:4',
+    mill: 'Fox Brothers',
+    cloth: 'West of England Chalk-Stripe Flannel',
+    weightGsm: 390,
+    tailoringHours: 84,
+    startingPriceGbp: 6150,
+    silhouette: 'High-gorge British notch lapel paired with six-button waistcoat',
+    construction: 'Hand-matched chalk stripe across every seam and pocket welt',
+    details: [
+      'Precision-aligned stripes across shoulder, chest welt, and waistcoat',
+      'Six-button notched waistcoat with adjustable satin back strap',
+      'Working four-button surgeon cuffs with hand-sewn buttonholes',
+      '2-inch trouser turn-ups for disciplined vertical fall',
+    ],
+    story:
+      'Woven on historic looms in Somerset, Fox Brothers flannel holds a razor-sharp crease while offering the unmistakable softness of brushed autumn wool.',
+    commissionYear: '2026',
+  },
+  {
+    id: 'mayfair-obsidian-db',
+    name: 'The Mayfair Obsidian Architectural',
+    subtitle: 'Jet-Black High-Twist Double-Breasted',
+    category: 'Double-Breasted',
+    image: HOUSE_IMAGES.obsidianDb,
+    aspect: '3:4',
+    mill: 'Dormeuil',
+    cloth: 'Tonik 2000 High-Twist Wool & Mohair',
+    weightGsm: 310,
+    tailoringHours: 76,
+    startingPriceGbp: 5600,
+    silhouette: 'Architectural squared shoulder with crisp crease recovery',
+    construction: 'Full-canvas architecture engineered for transcontinental travel',
+    details: [
+      'High-twist mohair blend resists creasing across long-haul flights',
+      'Sharp ticket pocket above flapped right hip pocket',
+      'Unvented clean rear panel or twin side vents to specification',
+      'Hand-pick stitching 1.5mm from lapel edge',
+    ],
+    story:
+      'Conceived for clients stepping off an overnight flight straight into evening engagements, Dormeuil mohair springs back cleanly without losing its austere architectural line.',
+    commissionYear: '2026',
+  },
+  {
+    id: 'napoli-slate-herringbone',
+    name: 'The Milan Slate Herringbone',
+    subtitle: 'Unstructured Cashmere-Wool Two-Piece',
+    category: 'Single-Breasted',
+    image: HOUSE_IMAGES.slateHerringbone,
+    aspect: '3:4',
+    mill: 'Vitale Barberis Canonico',
+    cloth: '90% Wool · 10% Cashmere Herringbone',
+    weightGsm: 320,
+    tailoringHours: 64,
+    startingPriceGbp: 4850,
+    silhouette: 'Soft Spalla Camicia shoulder with relaxed three-roll-two stance',
+    construction: 'Minimal half-lined interior with soft cotton-horsehair chest piece',
+    details: [
+      'Three-roll-two lapel softly pressed to reveal only the middle button',
+      'Curved Barchetta breast pocket and soft patch hip pockets',
+      'Extended-tab high-rise pleated trousers with horn buttons',
+      'Pleated shirt-sleeve shoulder head for effortless arm mobility',
+    ],
+    story:
+      'Our Milanese house silhouette strips away excess padding so the natural drape of Biella cashmere-wool follows the movement of the collar and shoulder.',
+    commissionYear: '2025',
+  },
+];
+
+export const CLOTH_ARCHIVE: ClothSwatch[] = [
+  {
+    id: 'dormeuil-tonik',
+    name: 'Tonik Obsidian High-Twist',
+    mill: 'Dormeuil',
+    origin: 'Huddersfield, England',
+    composition: '70% Super 120s Wool · 30% Kid Mohair',
+    weightGsm: 310,
+    season: 'All-Season Travel',
+    swatchHex: '#18191D',
+    weavePattern: 'sharkskin',
+    notes: 'Crisp dry handle, exceptional crease recovery, subtle architectural sheen under evening light.',
+  },
+  {
+    id: 'fox-espresso-flannel',
+    name: 'Somerset Espresso Chalk-Stripe',
+    mill: 'Fox Brothers & Co.',
+    origin: 'Wellington, England',
+    composition: '100% Virgin Merino Worsted Flannel',
+    weightGsm: 390,
+    season: 'Autumn / Winter',
+    swatchHex: '#332924',
+    weavePattern: 'chalkstripe',
+    notes: 'Dense brushed nap with 18mm chalk pinstripe; holds an unyielding trouser crease.',
+  },
+  {
+    id: 'loro-piana-barathea',
+    name: 'Midnight Evening Barathea',
+    mill: 'Loro Piana',
+    origin: 'Quarona, Italy',
+    composition: '85% Super 160s Wool · 15% Mulberry Silk',
+    weightGsm: 300,
+    season: 'Formal & Black Tie',
+    swatchHex: '#111726',
+    weavePattern: 'barathea',
+    notes: 'Tightly pebbled evening weave engineered to appear deeper than black under artificial light.',
+  },
+  {
+    id: 'vbc-slate-herringbone',
+    name: 'Biella Slate Herringbone',
+    mill: 'Vitale Barberis Canonico',
+    origin: 'Pratrivero, Italy',
+    composition: '90% Merino Wool · 10% Cashmere',
+    weightGsm: 320,
+    season: 'Three-Season',
+    swatchHex: '#2B2F36',
+    weavePattern: 'herringbone',
+    notes: 'Supple twill reversal delivering depth without visual loudness; ideal for unpadded cuts.',
+  },
+  {
+    id: 'holland-sherry-150s',
+    name: 'Savile Charcoal Worsted',
+    mill: 'Holland & Sherry',
+    origin: 'Peebles, Scotland',
+    composition: '100% Super 150s Fine Worsted',
+    weightGsm: 340,
+    season: 'Year-Round Classic',
+    swatchHex: '#232428',
+    weavePattern: 'flannel',
+    notes: 'Balanced drape and durability; the foundational cloth of our Savile Row double-breasted cut.',
+  },
+];
+
+export const MASTER_CUTTERS: MasterCutter[] = [
+  {
+    id: 'julian-marlowe',
+    name: 'Julian Marlowe',
+    title: 'Head Cutter & Founder',
+    atelier: 'London · Savile Row',
+    experienceYears: 24,
+    specialty: 'Double-breasted silhouettes & formal morning wear',
+  },
+  {
+    id: 'matteo-conti',
+    name: 'Matteo Conti',
+    title: 'Senior Coat Maker',
+    atelier: 'Milan · Via Brera',
+    experienceYears: 18,
+    specialty: 'Soft-shouldered cashmere jackets & three-roll-two cuts',
+  },
+  {
+    id: 'elena-rostova',
+    name: 'Elena Rostova',
+    title: 'Master Evening & Trouser Cutter',
+    atelier: 'London & Private Trunk Shows',
+    experienceYears: 14,
+    specialty: 'Black tie commissions, wedding ensembles & anatomical balance',
+  },
+];
+
+export const FITTING_SERVICES: FittingService[] = [
+  {
+    id: 'initial-bespoke',
+    name: 'First Bespoke Consultation',
+    durationMinutes: 60,
+    feeLabel: 'Complimentary',
+    summary:
+      'Cloth book exploration, silhouette study, and 32-point anatomical measurement to draft your individual paper pattern.',
+  },
+  {
+    id: 'basted-fitting',
+    name: 'Basted & Forward Fitting',
+    durationMinutes: 45,
+    feeLabel: 'Commission Milestone',
+    summary:
+      'In-person inspection of your hand-basted skeleton garment to refine shoulder pitch, lapel roll, and trouser drape.',
+  },
+  {
+    id: 'black-tie-wedding',
+    name: 'Evening & Wedding Commission',
+    durationMinutes: 75,
+    feeLabel: 'Complimentary',
+    summary:
+      'Private salon session dedicated to tuxedo proportions, silk facing selection, and ceremony timeline planning.',
+  },
+  {
+    id: 'virtual-atelier',
+    name: 'Private Virtual Consultation',
+    durationMinutes: 45,
+    feeLabel: 'Global Clients',
+    summary:
+      'Video fitting guidance with our head cutter accompanied by curated cloth swatch dispatch prior to travel.',
+  },
+];
+
+export const ATELIER_LOCATIONS: AtelierLocation[] = [
+  {
+    id: 'london-savile',
+    city: 'London',
+    address: '14 Savile Row, Mayfair, W1S 3JN',
+    hours: 'Mon–Sat · 09:30 – 18:30',
+  },
+  {
+    id: 'milan-brera',
+    city: 'Milan',
+    address: 'Via Brera 28, 20121 Milano',
+    hours: 'Mon–Sat · 10:00 – 19:00',
+  },
+  {
+    id: 'virtual-salon',
+    city: 'Private Salon / Video',
+    address: 'Encrypted HD Video Link & Swatch Courier',
+    hours: 'Flexible Time Zones',
+  },
+];
+
+export const TIME_SLOTS = ['10:00', '11:30', '14:00', '15:30', '17:00'] as const;
