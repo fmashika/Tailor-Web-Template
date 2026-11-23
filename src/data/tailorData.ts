@@ -4,6 +4,7 @@ import {
   ClothSwatch,
   FittingService,
   MasterCutter,
+  ShopProduct,
 } from '../types/tailor';
 
 export const HOUSE_IMAGES = {
@@ -13,7 +14,134 @@ export const HOUSE_IMAGES = {
   obsidianDb: '/src/assets/images/suit_obsidian_db_1795447611195.jpg',
   slateHerringbone: '/src/assets/images/suit_slate_herringbone_1795447609965.jpg',
   atelierHands: '/src/assets/images/atelier_craft_hands_1795447610945.jpg',
+  shopSilkTie: '/src/assets/images/shop_silk_grenadine_tie_1795448375174.jpg',
+  shopDressShirt: '/src/assets/images/shop_poplin_dress_shirt_1795448376205.jpg',
+  shopCashmereCoat: '/src/assets/images/shop_cashmere_overcoat_1795448376079.jpg',
+  shopLeatherBag: '/src/assets/images/shop_leather_garment_bag_1795448376332.jpg',
 } as const;
+
+export const SHOP_PRODUCTS: ShopProduct[] = [
+  {
+    id: 'savile-cashmere-overcoat',
+    sku: 'MB-OW-01',
+    name: 'Savile Charcoal Cashmere Overcoat',
+    category: 'Outerwear',
+    priceGbp: 2450,
+    image: HOUSE_IMAGES.shopCashmereCoat,
+    material: '100% Double-Faced Mongolian Cashmere',
+    origin: 'Cut in London',
+    leadTime: 'In Stock · Dispatches in 24h',
+    description:
+      'Single-breasted town overcoat cut with generous room to glide effortlessly over a tailored jacket. Finished with horn buttons and hand-picked notch lapels.',
+    variantLabel: 'Chest Size',
+    variants: ['38R', '40R', '42R', '44R'],
+    details: [
+      '620 g/m² brushed cashmere woven in Biella',
+      'Full Bemberg cupro sleeve and chest lining',
+      'Concealed interior ticket and passport pockets',
+    ],
+  },
+  {
+    id: 'sea-island-poplin-shirt',
+    sku: 'MB-SH-02',
+    name: 'Sea Island Poplin Dress Shirt',
+    category: 'Shirting',
+    priceGbp: 395,
+    image: HOUSE_IMAGES.shopDressShirt,
+    material: 'Two-Fold 170s West Indian Sea Island Cotton',
+    origin: 'Somerset Shirtmakers',
+    leadTime: 'In Stock · Dispatches in 24h',
+    description:
+      'Crisp, luminous poplin engineered for eveningwear and boardroom suiting. Cut with a medium spread collar, split yoke, and French cuffs.',
+    variantLabel: 'Collar Size',
+    variants: ['15"', '15.5"', '16"', '16.5"', '17"'],
+    details: [
+      '3.5mm genuine Australian mother-of-pearl buttons',
+      'Single-needle 22 stitches-per-inch side seams',
+      'Removable brass collar stays included',
+    ],
+  },
+  {
+    id: 'como-grenadine-tie-set',
+    sku: 'MB-NK-03',
+    name: 'Como Silk Grenadine Tie & Square',
+    category: 'Silk & Neckwear',
+    priceGbp: 240,
+    image: HOUSE_IMAGES.shopSilkTie,
+    material: '100% Garza Grossa Mulberry Silk',
+    origin: 'Como, Italy',
+    leadTime: 'In Stock · Dispatches in 24h',
+    description:
+      'Woven on wooden shuttle looms in Como using open-weave grenadine silk, paired with a matching hand-rolled midnight pocket square.',
+    variantLabel: 'Blade & Length',
+    variants: ['8.5cm · Regular (148cm)', '8.5cm · Long (156cm)'],
+    details: [
+      'Untipped three-fold construction with hand-rolled edges',
+      'Pure wool interlining for a symmetrical dimple',
+      'Includes 33cm hand-rolled silk pocket square',
+    ],
+  },
+  {
+    id: 'bridle-leather-garment-bag',
+    sku: 'MB-LT-04',
+    name: 'Bridle Leather Suit Carrier',
+    category: 'Leather & Travel',
+    priceGbp: 1180,
+    image: HOUSE_IMAGES.shopLeatherBag,
+    material: 'Full-Grain Oak-Bark Bridle Leather',
+    origin: 'Walsall, England',
+    leadTime: 'In Stock · Dispatches in 24h',
+    description:
+      'Tri-fold travel suit carrier designed to hold two bespoke suits on cedar hangers without creasing, fitted with solid sand-cast brass buckles.',
+    variantLabel: 'Hide Finish',
+    variants: ['Espresso Bridle', 'Obsidian Black'],
+    details: [
+      'Fits overhead cabin lockers on long-haul aircraft',
+      'Dedicated shirt gusset and shoe pocket compartments',
+      'Solid brass hanging hook and cedar hanger included',
+    ],
+  },
+  {
+    id: 'mayfair-obsidian-rtw-suit',
+    sku: 'MB-SU-05',
+    name: 'Mayfair Obsidian 6x2 RTW Suit',
+    category: 'Ready-to-Wear Suits',
+    priceGbp: 3250,
+    image: HOUSE_IMAGES.obsidianDb,
+    material: 'Dormeuil High-Twist Wool & Mohair',
+    origin: 'London House Block',
+    leadTime: 'Ready-to-Wear · Includes Hemming',
+    description:
+      'Our signature six-on-two architectural double-breasted silhouette produced on our Savile Row house block with floating chest canvas and unfinished trouser hems.',
+    variantLabel: 'Suit Size',
+    variants: ['38R', '40R', '42R', '44R', '42L'],
+    details: [
+      'Half-floating horsehair canvas with hand-basted collar',
+      'High-waisted pleated trousers with side adjusters',
+      'Complimentary trouser hemming at London or Milan atelier',
+    ],
+  },
+  {
+    id: 'milan-herringbone-rtw-suit',
+    sku: 'MB-SU-06',
+    name: 'Milan Slate Herringbone RTW Suit',
+    category: 'Ready-to-Wear Suits',
+    priceGbp: 2950,
+    image: HOUSE_IMAGES.slateHerringbone,
+    material: '90% Merino Wool · 10% Cashmere',
+    origin: 'Biella Cloth · Milan Cut',
+    leadTime: 'Ready-to-Wear · Includes Hemming',
+    description:
+      'Soft-shouldered three-roll-two single-breasted suit cut from brushed Biella cashmere-wool herringbone with patch pockets and turn-up ready trousers.',
+    variantLabel: 'Suit Size',
+    variants: ['38R', '40R', '42R', '44R'],
+    details: [
+      'Unpadded Spalla Camicia shoulder construction',
+      'Horn buttons with working sleeve cuff preparation',
+      'Breathable Bemberg partial jacket lining',
+    ],
+  },
+];
 
 export const SUIT_PORTFOLIO: BespokeSuit[] = [
   {

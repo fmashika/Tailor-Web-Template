@@ -32,6 +32,13 @@ export function Footer({ onNavigate }: FooterProps) {
           </button>
           <button
             type="button"
+            onClick={() => onNavigate('shop')}
+            className="hover:text-[#F4F1EA] transition-colors cursor-pointer"
+          >
+            Shop
+          </button>
+          <button
+            type="button"
             onClick={() => onNavigate('craft')}
             className="hover:text-[#F4F1EA] transition-colors cursor-pointer"
           >

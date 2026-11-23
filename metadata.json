@@ -1,6 +1,8 @@
 {
-  "name": "Marlowe Bespoke",
+  "name": "Tailor Web Template",
   "description": "Cinematic Savile Row and Milanese bespoke tailoring house featuring a custom suit portfolio and online private fitting appointment system.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

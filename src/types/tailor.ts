@@ -1,4 +1,55 @@
-export type PageRoute = 'atelier' | 'portfolio' | 'craft' | 'appointments';
+export type PageRoute = 'atelier' | 'portfolio' | 'shop' | 'craft' | 'appointments';
+
+export type ShopCategory =
+  | 'All'
+  | 'Ready-to-Wear Suits'
+  | 'Outerwear'
+  | 'Shirting'
+  | 'Silk & Neckwear'
+  | 'Leather & Travel';
+
+export interface ShopProduct {
+  id: string;
+  sku: string;
+  name: string;
+  category: Exclude<ShopCategory, 'All'>;
+  priceGbp: number;
+  image: string;
+  material: string;
+  origin: string;
+  leadTime: string;
+  description: string;
+  variants: string[];
+  variantLabel: string;
+  details: string[];
+}
+
+export interface CartItem {
+  productId: string;
+  variant: string;
+  quantity: number;
+}
+
+export interface ShopOrder {
+  orderNumber: string;
+  items: {
+    productId: string;
+    name: string;
+    variant: string;
+    quantity: number;
+    unitPriceGbp: number;
+  }[];
+  subtotalGbp: number;
+  shippingGbp: number;
+  totalGbp: number;
+  customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  city: string;
+  postalCode: string;
+  paymentMethod: 'Card Dispatch' | 'Cash on Delivery';
+  createdAtIso: string;
+}
 
 export type SuitCategory =
   | 'All'

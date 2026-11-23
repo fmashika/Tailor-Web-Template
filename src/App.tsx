@@ -1,14 +1,25 @@
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 import { Navbar } from './components/Navbar';
+import { ProductDetailModal } from './components/ProductDetailModal';
 import { SuitMonographModal } from './components/SuitMonographModal';
 import { AppointmentsPage } from './pages/AppointmentsPage';
 import { AtelierHomePage } from './pages/AtelierHomePage';
 import { CraftPage } from './pages/CraftPage';
 import { PortfolioPage } from './pages/PortfolioPage';
-import { Appointment, BespokeSuit, PageRoute } from './types/tailor';
+import { ShopPage } from './pages/ShopPage';
+import {
+  Appointment,
+  BespokeSuit,
+  CartItem,
+  PageRoute,
+  ShopOrder,
+  ShopProduct,
+} from './types/tailor';
 import { loadAppointments, saveAppointments } from './utils/bookingStore';
+import { loadCart, loadOrders, saveCart, saveOrders } from './utils/cartStore';
 
 const ROUTE_TRANSITION = {
   duration: 0.36,
@@ -20,6 +31,7 @@ function getInitialRoute(): PageRoute {
   if (
     hash === 'atelier' ||
     hash === 'portfolio' ||
+    hash === 'shop' ||
     hash === 'craft' ||
     hash === 'appointments'
   ) {
@@ -31,10 +43,14 @@ function getInitialRoute(): PageRoute {
 export default function App() {
   const [route, setRoute] = useState<PageRoute>(getInitialRoute);
   const [selectedSuit, setSelectedSuit] = useState<BespokeSuit | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ShopProduct | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [bookingCommissionRef, setBookingCommissionRef] = useState<string>('');
   const [appointments, setAppointments] = useState<Appointment[]>(() =>
     loadAppointments()
   );
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => loadCart());
+  const [orders, setOrders] = useState<ShopOrder[]>(() => loadOrders());
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -90,16 +106,81 @@ export default function App() {
     });
   };
 
+  const handleAddToCart = (
+    product: ShopProduct,
+    variant: string,
+    quantity = 1
+  ) => {
+    setCartItems((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.productId === product.id && item.variant === variant
+      );
+      let next: CartItem[];
+      if (existingIndex >= 0) {
+        next = prev.map((item, idx) =>
+          idx === existingIndex
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        next = [...prev, { productId: product.id, variant, quantity }];
+      }
+      saveCart(next);
+      return next;
+    });
+  };
+
+  const handleUpdateCartQuantity = (
+    productId: string,
+    variant: string,
+    nextQty: number
+  ) => {
+    setCartItems((prev) => {
+      const next =
+        nextQty <= 0
+          ? prev.filter(
+              (item) => !(item.productId === productId && item.variant === variant)
+            )
+          : prev.map((item) =>
+              item.productId === productId && item.variant === variant
+                ? { ...item, quantity: nextQty }
+                : item
+            );
+      saveCart(next);
+      return next;
+    });
+  };
+
+  const handleRemoveCartItem = (productId: string, variant: string) => {
+    setCartItems((prev) => {
+      const next = prev.filter(
+        (item) => !(item.productId === productId && item.variant === variant)
+      );
+      saveCart(next);
+      return next;
+    });
+  };
+
+  const handlePlaceOrder = (order: ShopOrder) => {
+    setOrders((prev) => {
+      const next = [order, ...prev];
+      saveOrders(next);
+      return next;
+    });
+    setCartItems([]);
+    saveCart([]);
+  };
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen flex flex-col bg-[#09090B] text-[#F4F1EA]">
         <Navbar
           activeRoute={route}
+          cartCount={cartCount}
           onNavigate={navigateTo}
-          onBookFitting={() => {
-            setBookingCommissionRef('');
-            navigateTo('appointments');
-          }}
+          onOpenCart={() => setIsCartOpen(true)}
         />
 
         <main className="flex-1">
@@ -129,6 +210,17 @@ export default function App() {
                 />
               )}
 
+              {route === 'shop' && (
+                <ShopPage
+                  cartCount={cartCount}
+                  onSelectProduct={setSelectedProduct}
+                  onQuickAdd={(product, variant) =>
+                    handleAddToCart(product, variant, 1)
+                  }
+                  onOpenCart={() => setIsCartOpen(true)}
+                />
+              )}
+
               {route === 'craft' && (
                 <CraftPage onCommissionCloth={handleBookWithReference} />
               )}
@@ -152,6 +244,23 @@ export default function App() {
           suit={selectedSuit}
           onClose={() => setSelectedSuit(null)}
           onCommissionSuit={handleBookWithReference}
+        />
+
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={handleAddToCart}
+        />
+
+        <CartDrawer
+          isOpen={isCartOpen}
+          items={cartItems}
+          orders={orders}
+          onClose={() => setIsCartOpen(false)}
+          onUpdateQuantity={handleUpdateCartQuantity}
+          onRemoveItem={handleRemoveCartItem}
+          onPlaceOrder={handlePlaceOrder}
+          onBrowseShop={() => navigateTo('shop')}
         />
       </div>
     </MotionConfig>

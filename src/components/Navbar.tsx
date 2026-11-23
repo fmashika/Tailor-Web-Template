@@ -1,22 +1,29 @@
-import { Menu, X } from 'lucide-react';
+import { Menu, ShoppingCart, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { PageRoute } from '../types/tailor';
 
 interface NavbarProps {
   activeRoute: PageRoute;
+  cartCount: number;
   onNavigate: (route: PageRoute) => void;
-  onBookFitting: () => void;
+  onOpenCart: () => void;
 }
 
 const NAV_ITEMS: { route: PageRoute; label: string }[] = [
   { route: 'atelier', label: 'Atelier' },
   { route: 'portfolio', label: 'Portfolio' },
+  { route: 'shop', label: 'Shop' },
   { route: 'craft', label: 'Craft' },
   { route: 'appointments', label: 'Appointments' },
 ];
 
-export function Navbar({ activeRoute, onNavigate, onBookFitting }: NavbarProps) {
+export function Navbar({
+  activeRoute,
+  cartCount,
+  onNavigate,
+  onOpenCart,
+}: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLinkClick = (route: PageRoute) => {
@@ -36,10 +43,10 @@ export function Navbar({ activeRoute, onNavigate, onBookFitting }: NavbarProps) 
           Marlowe Bespoke
         </button>
 
-        {/* Zone 2: 4 Single-line Text Nav Links */}
+        {/* Zone 2: 5 Single-line Text Nav Links */}
         <nav
           aria-label="Primary navigation"
-          className="hidden md:flex items-center gap-8 text-sm font-medium"
+          className="hidden md:flex items-center gap-7 text-sm font-medium"
         >
           {NAV_ITEMS.map((item) => {
             const isActive = activeRoute === item.route;
@@ -67,17 +74,18 @@ export function Navbar({ activeRoute, onNavigate, onBookFitting }: NavbarProps) 
           })}
         </nav>
 
-        {/* Zone 3: 1 Primary Action */}
+        {/* Zone 3: 1 Primary Action (Cart) */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => {
               setMobileMenuOpen(false);
-              onBookFitting();
+              onOpenCart();
             }}
-            className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 text-xs font-medium tracking-wide bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4F1EA]"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium tracking-wide bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4F1EA]"
           >
-            Book Fitting
+            <ShoppingCart className="w-3.5 h-3.5" />
+            <span>Cart ({cartCount})</span>
           </button>
 
           <button
@@ -94,7 +102,7 @@ export function Navbar({ activeRoute, onNavigate, onBookFitting }: NavbarProps) 
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0E0E12] border-t border-[#F4F1EA]/10 px-6 py-5 space-y-1">
+        <div className="md:hidden bg-[#0E0E12] border-t border-[#F4F1EA]/10 px-6 py-4 space-y-1">
           {NAV_ITEMS.map((item) => {
             const isActive = activeRoute === item.route;
             return (
@@ -110,18 +118,6 @@ export function Navbar({ activeRoute, onNavigate, onBookFitting }: NavbarProps) 
               </button>
             );
           })}
-          <div className="pt-4">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onBookFitting();
-              }}
-              className="w-full py-3 px-5 text-sm font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors cursor-pointer"
-            >
-              Book Fitting
-            </button>
-          </div>
         </div>
       )}
     </header>
