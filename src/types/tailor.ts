@@ -77,14 +77,37 @@ export interface BespokeSuit {
   commissionYear: string;
 }
 
+export type ClothMaterialFilter =
+  | 'All'
+  | 'Pure Wool'
+  | 'Wool & Cashmere'
+  | 'Wool & Mohair'
+  | 'Wool & Silk'
+  | 'Linen & Silk';
+
+export type ClothSeasonFilter =
+  | 'All'
+  | 'Year-Round'
+  | 'Autumn / Winter'
+  | 'Spring / Summer'
+  | 'Formal & Evening';
+
+export type ClothWeightFilter =
+  | 'All'
+  | 'Light'
+  | 'Mid'
+  | 'Heavy';
+
 export interface ClothSwatch {
   id: string;
   name: string;
   mill: string;
   origin: string;
   composition: string;
+  materialCategory: Exclude<ClothMaterialFilter, 'All'>;
   weightGsm: number;
   season: string;
+  seasonCategory: Exclude<ClothSeasonFilter, 'All'>;
   swatchHex: string;
   weavePattern: 'herringbone' | 'chalkstripe' | 'barathea' | 'sharkskin' | 'flannel';
   notes: string;

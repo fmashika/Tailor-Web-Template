@@ -145,47 +145,27 @@ export function CartDrawer({
             className="w-full max-w-lg h-full bg-[#0E0E12] border-l border-[#F4F1EA]/12 flex flex-col shadow-2xl"
           >
             {/* Drawer Header */}
-            <div className="px-6 py-5 border-b border-[#F4F1EA]/10 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                {step === 'checkout' && (
-                  <button
-                    type="button"
-                    onClick={() => setStep('bag')}
-                    aria-label="Back to shopping cart"
-                    className="p-1.5 text-[#A19E95] hover:text-[#F4F1EA] transition-colors cursor-pointer"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                  </button>
-                )}
-                <div>
+            <div className="px-6 pt-5 pb-4 border-b border-[#F4F1EA]/10 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  {step === 'checkout' && (
+                    <button
+                      type="button"
+                      onClick={() => setStep('bag')}
+                      aria-label="Back to shopping cart"
+                      className="p-1.5 text-[#A19E95] hover:text-[#F4F1EA] transition-colors cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </button>
+                  )}
                   <h2 className="font-serif text-2xl text-[#F4F1EA]">
                     {step === 'bag' && `Cart (${totalUnits})`}
                     {step === 'checkout' && 'Delivery & Verification'}
                     {step === 'confirmed' && 'Order Confirmed'}
-                    {step === 'orders' && `Placed Orders (${orders.length})`}
+                    {step === 'orders' && 'Order History'}
                   </h2>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3">
-                {orders.length > 0 && step !== 'orders' && (
-                  <button
-                    type="button"
-                    onClick={() => setStep('orders')}
-                    className="text-xs text-[#C8A464] hover:text-[#D7B67A] transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    Orders ({orders.length})
-                  </button>
-                )}
-                {step === 'orders' && (
-                  <button
-                    type="button"
-                    onClick={() => setStep('bag')}
-                    className="text-xs text-[#C8A464] hover:text-[#D7B67A] transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    Back to Cart
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={onClose}
@@ -195,6 +175,42 @@ export function CartDrawer({
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Drawer Section Switcher */}
+              {step !== 'checkout' && (
+                <div
+                  role="tablist"
+                  aria-label="Cart sections"
+                  className="grid grid-cols-2 gap-1 p-1 bg-[#09090B] border border-[#F4F1EA]/10"
+                >
+                  <button
+                    role="tab"
+                    aria-selected={step === 'bag' || step === 'confirmed'}
+                    type="button"
+                    onClick={() => setStep('bag')}
+                    className={`py-2 px-3 text-xs font-medium transition-colors whitespace-nowrap tabular-nums cursor-pointer ${
+                      step === 'bag' || step === 'confirmed'
+                        ? 'bg-[#C8A464] text-[#09090B]'
+                        : 'text-[#A19E95] hover:text-[#F4F1EA]'
+                    }`}
+                  >
+                    Cart ({totalUnits})
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected={step === 'orders'}
+                    type="button"
+                    onClick={() => setStep('orders')}
+                    className={`py-2 px-3 text-xs font-medium transition-colors whitespace-nowrap tabular-nums cursor-pointer ${
+                      step === 'orders'
+                        ? 'bg-[#C8A464] text-[#09090B]'
+                        : 'text-[#A19E95] hover:text-[#F4F1EA]'
+                    }`}
+                  >
+                    Order History ({orders.length})
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Drawer Body */}
@@ -516,35 +532,121 @@ export function CartDrawer({
               )}
 
               {step === 'orders' && (
-                <div className="space-y-4">
+                <section aria-label="Order History" className="space-y-5">
                   {orders.length === 0 ? (
-                    <p className="text-sm text-[#A19E95]">No orders placed yet.</p>
-                  ) : (
-                    orders.map((order) => (
-                      <div
-                        key={order.orderNumber}
-                        className="p-4 bg-[#141418] border border-[#F4F1EA]/12 space-y-2 text-xs"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[#C8A464] tabular-nums">
-                            {order.orderNumber}
-                          </span>
-                          <span className="text-[#F4F1EA] font-medium tabular-nums">
-                            £{order.totalGbp.toLocaleString('en-GB')}
-                          </span>
-                        </div>
-                        <p className="text-[#F4F1EA]">
-                          {order.customerName} · {order.city}
+                    <div className="py-16 text-center space-y-4">
+                      <ShoppingCart
+                        className="w-9 h-9 text-[#C8A464]/60 mx-auto"
+                        strokeWidth={1.25}
+                      />
+                      <div className="space-y-1.5">
+                        <p className="font-serif text-2xl text-[#F4F1EA]">
+                          No Completed Orders Yet
                         </p>
-                        <p className="text-[#A19E95]">
-                          {order.items
-                            .map((i) => `${i.quantity}× ${i.name} (${i.variant})`)
-                            .join(', ')}
+                        <p className="text-xs text-[#A19E95] max-w-xs mx-auto leading-relaxed">
+                          Completed purchases from the Atelier Shop will appear here with
+                          transaction dates and itemized garments.
                         </p>
                       </div>
-                    ))
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onBrowseShop();
+                        }}
+                        className="px-6 py-3 text-xs font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors cursor-pointer"
+                      >
+                        Explore Atelier Shop
+                      </button>
+                    </div>
+                  ) : (
+                    orders.map((order) => {
+                      const orderDate = new Date(order.createdAtIso);
+                      const formattedDate = Number.isNaN(orderDate.getTime())
+                        ? order.createdAtIso
+                        : orderDate.toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          });
+                      const formattedTime = Number.isNaN(orderDate.getTime())
+                        ? ''
+                        : orderDate.toLocaleTimeString('en-GB', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          });
+
+                      return (
+                        <article
+                          key={order.orderNumber}
+                          className="p-5 bg-[#141418] border border-[#F4F1EA]/12 space-y-4"
+                        >
+                          {/* Transaction Header */}
+                          <div className="flex items-start justify-between gap-4 pb-3 border-b border-[#F4F1EA]/10">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="font-mono text-[#C8A464] tabular-nums">
+                                  {order.orderNumber}
+                                </span>
+                                <span aria-hidden="true" className="text-[#A19E95]">
+                                  ·
+                                </span>
+                                <span className="text-[#F4F1EA]">Completed</span>
+                              </div>
+                              <p className="text-xs text-[#A19E95] tabular-nums">
+                                {formattedDate}
+                                {formattedTime ? ` at ${formattedTime}` : ''}
+                              </p>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <p className="text-[11px] text-[#A19E95]">Total</p>
+                              <p className="font-serif text-xl text-[#F4F1EA] tabular-nums">
+                                £{order.totalGbp.toLocaleString('en-GB')}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Purchased Items */}
+                          <ul className="space-y-2.5 text-xs">
+                            {order.items.map((item) => (
+                              <li
+                                key={`${order.orderNumber}-${item.productId}-${item.variant}`}
+                                className="flex items-baseline justify-between gap-4"
+                              >
+                                <div className="min-w-0">
+                                  <p className="text-[#F4F1EA] font-medium truncate">
+                                    {item.quantity} × {item.name}
+                                  </p>
+                                  <p className="text-[#A19E95]">{item.variant}</p>
+                                </div>
+                                <span className="text-[#F4F1EA]/90 tabular-nums shrink-0">
+                                  £
+                                  {(item.unitPriceGbp * item.quantity).toLocaleString(
+                                    'en-GB'
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {/* Recipient & Payment Metadata */}
+                          <div className="pt-3 border-t border-[#F4F1EA]/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#A19E95]">
+                            <span>
+                              {order.customerName} · {order.city} {order.postalCode}
+                            </span>
+                            <span>
+                              {order.paymentMethod} ·{' '}
+                              {order.shippingGbp === 0
+                                ? 'Complimentary Courier'
+                                : `Courier £${order.shippingGbp}`}
+                            </span>
+                          </div>
+                        </article>
+                      );
+                    })
                   )}
-                </div>
+                </section>
               )}
             </div>
 
@@ -601,14 +703,21 @@ export function CartDrawer({
             )}
 
             {step === 'confirmed' && (
-              <div className="p-6 border-t border-[#F4F1EA]/10 bg-[#0B0B0E]">
+              <div className="p-6 border-t border-[#F4F1EA]/10 bg-[#0B0B0E] grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep('orders')}
+                  className="py-3 px-4 text-xs font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors cursor-pointer"
+                >
+                  View Order History
+                </button>
                 <button
                   type="button"
                   onClick={() => {
                     setStep('bag');
                     onClose();
                   }}
-                  className="w-full py-3 px-6 text-xs font-medium bg-[#F4F1EA] text-[#09090B] hover:bg-[#C8A464] transition-colors cursor-pointer"
+                  className="py-3 px-4 text-xs font-medium bg-[#F4F1EA] text-[#09090B] hover:bg-[#D7B67A] transition-colors cursor-pointer"
                 >
                   Return to Storefront
                 </button>

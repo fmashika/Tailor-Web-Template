@@ -1,7 +1,12 @@
-import { ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, ArrowUpDown, RotateCcw } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { CLOTH_ARCHIVE, HOUSE_IMAGES } from '../data/tailorData';
-import { ClothSwatch } from '../types/tailor';
+import {
+  ClothMaterialFilter,
+  ClothSeasonFilter,
+  ClothSwatch,
+  ClothWeightFilter,
+} from '../types/tailor';
 import { ResilientImage } from '../components/ResilientImage';
 
 interface CraftPageProps {
@@ -32,6 +37,32 @@ const PROCESS_STAGES = [
   },
 ];
 
+const MATERIAL_FILTERS: ClothMaterialFilter[] = [
+  'All',
+  'Pure Wool',
+  'Wool & Cashmere',
+  'Wool & Mohair',
+  'Wool & Silk',
+  'Linen & Silk',
+];
+
+const SEASON_FILTERS: ClothSeasonFilter[] = [
+  'All',
+  'Year-Round',
+  'Autumn / Winter',
+  'Spring / Summer',
+  'Formal & Evening',
+];
+
+const WEIGHT_FILTERS: { id: ClothWeightFilter; label: string }[] = [
+  { id: 'All', label: 'All Weights' },
+  { id: 'Light', label: 'Light (< 290g)' },
+  { id: 'Mid', label: 'Mid (290–350g)' },
+  { id: 'Heavy', label: 'Heavy (> 350g)' },
+];
+
+type WeightSortOrder = 'archive' | 'light-first' | 'heavy-first';
+
 function ClothTexturePreview({ swatch }: { swatch: ClothSwatch }) {
   return (
     <div
@@ -51,8 +82,21 @@ function ClothTexturePreview({ swatch }: { swatch: ClothSwatch }) {
               height="24"
               patternUnits="userSpaceOnUse"
             >
-              <line x1="12" y1="0" x2="12" y2="24" stroke="#F4F1EA" strokeWidth="1" strokeDasharray="2 2" />
-              <path d="M0 0 L24 24 M-6 18 L6 30 M18 -6 L30 6" stroke="#000" strokeOpacity="0.25" strokeWidth="1" />
+              <line
+                x1="12"
+                y1="0"
+                x2="12"
+                y2="24"
+                stroke="#F4F1EA"
+                strokeWidth="1"
+                strokeDasharray="2 2"
+              />
+              <path
+                d="M0 0 L24 24 M-6 18 L6 30 M18 -6 L30 6"
+                stroke="#000"
+                strokeOpacity="0.25"
+                strokeWidth="1"
+              />
             </pattern>
           )}
           {swatch.weavePattern === 'herringbone' && (
@@ -110,9 +154,83 @@ function ClothTexturePreview({ swatch }: { swatch: ClothSwatch }) {
 }
 
 export function CraftPage({ onCommissionCloth }: CraftPageProps) {
+  const [materialFilter, setMaterialFilter] = useState<ClothMaterialFilter>('All');
+  const [seasonFilter, setSeasonFilter] = useState<ClothSeasonFilter>('All');
+  const [weightFilter, setWeightFilter] = useState<ClothWeightFilter>('All');
+  const [weightSort, setWeightSort] = useState<WeightSortOrder>('archive');
   const [selectedClothId, setSelectedClothId] = useState<string>(CLOTH_ARCHIVE[0].id);
+
+  const filteredCloths = useMemo(() => {
+    const filtered = CLOTH_ARCHIVE.filter((cloth) => {
+      if (materialFilter !== 'All' && cloth.materialCategory !== materialFilter) {
+        return false;
+      }
+      if (seasonFilter !== 'All' && cloth.seasonCategory !== seasonFilter) {
+        return false;
+      }
+      if (weightFilter === 'Light' && cloth.weightGsm >= 290) {
+        return false;
+      }
+      if (
+        weightFilter === 'Mid' &&
+        (cloth.weightGsm < 290 || cloth.weightGsm > 350)
+      ) {
+        return false;
+      }
+      if (weightFilter === 'Heavy' && cloth.weightGsm <= 350) {
+        return false;
+      }
+      return true;
+    });
+
+    if (weightSort === 'light-first') {
+      return [...filtered].sort((a, b) => a.weightGsm - b.weightGsm);
+    }
+    if (weightSort === 'heavy-first') {
+      return [...filtered].sort((a, b) => b.weightGsm - a.weightGsm);
+    }
+    return filtered;
+  }, [materialFilter, seasonFilter, weightFilter, weightSort]);
+
+  useEffect(() => {
+    if (
+      filteredCloths.length > 0 &&
+      !filteredCloths.some((c) => c.id === selectedClothId)
+    ) {
+      setSelectedClothId(filteredCloths[0].id);
+    }
+  }, [filteredCloths, selectedClothId]);
+
   const selectedCloth =
-    CLOTH_ARCHIVE.find((c) => c.id === selectedClothId) ?? CLOTH_ARCHIVE[0];
+    filteredCloths.find((c) => c.id === selectedClothId) ?? filteredCloths[0] ?? null;
+
+  const hasActiveFilters =
+    materialFilter !== 'All' ||
+    seasonFilter !== 'All' ||
+    weightFilter !== 'All' ||
+    weightSort !== 'archive';
+
+  const handleResetFilters = () => {
+    setMaterialFilter('All');
+    setSeasonFilter('All');
+    setWeightFilter('All');
+    setWeightSort('archive');
+  };
+
+  const handleCycleWeightSort = () => {
+    setWeightSort((prev) => {
+      if (prev === 'archive') return 'light-first';
+      if (prev === 'light-first') return 'heavy-first';
+      return 'archive';
+    });
+  };
+
+  const weightSortLabel =
+    weightSort === 'light-first'
+      ? 'Weight: Light → Heavy'
+      : weightSort === 'heavy-first'
+        ? 'Weight: Heavy → Light'
+        : 'Sort by Weight';
 
   return (
     <section className="max-w-7xl mx-auto px-6 md:px-10 py-12 md:py-16 space-y-20">
@@ -193,9 +311,9 @@ export function CraftPage({ onCommissionCloth }: CraftPageProps) {
         </div>
       </div>
 
-      {/* Interactive Cloth Archive */}
-      <div className="border-t border-[#F4F1EA]/10 pt-14">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      {/* Interactive Cloth Archive with Material, Season & Weight Filters */}
+      <div className="border-t border-[#F4F1EA]/10 pt-14 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-xs tracking-[0.18em] uppercase text-[#C8A464] mb-2">
               Mill Library
@@ -204,98 +322,234 @@ export function CraftPage({ onCommissionCloth }: CraftPageProps) {
               Curated Cloth Archive
             </h2>
           </div>
-          <p className="text-xs text-[#A19E95]">
-            Select any cloth bolt to inspect mill origin and reserve swatches for your fitting
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Swatch Selector List */}
-          <div className="lg:col-span-5 divide-y divide-[#F4F1EA]/10 border border-[#F4F1EA]/10 bg-[#111114]">
-            {CLOTH_ARCHIVE.map((cloth) => {
-              const active = cloth.id === selectedCloth.id;
-              return (
-                <button
-                  key={cloth.id}
-                  type="button"
-                  onClick={() => setSelectedClothId(cloth.id)}
-                  className={`w-full text-left p-5 flex items-center justify-between gap-4 transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-[#18181D] text-[#F4F1EA]'
-                      : 'hover:bg-[#151519] text-[#A19E95]'
-                  }`}
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span
-                      className="w-8 h-8 border border-[#F4F1EA]/20 shrink-0"
-                      style={{ backgroundColor: cloth.swatchHex }}
-                      aria-hidden="true"
-                    />
-                    <div className="min-w-0">
-                      <p className="font-serif text-xl text-[#F4F1EA] truncate">
-                        {cloth.name}
-                      </p>
-                      <p className="text-xs text-[#A19E95] truncate">
-                        {cloth.mill} · {cloth.origin}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-mono tabular-nums text-[#C8A464] shrink-0">
-                    {cloth.weightGsm}g
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-[#A19E95] tabular-nums">
+              Showing {filteredCloths.length} of {CLOTH_ARCHIVE.length} cloths
+            </span>
 
-          {/* Right Cloth Dossier */}
-          <div className="lg:col-span-7 bg-[#111114] border border-[#F4F1EA]/10 p-7 md:p-9 space-y-6">
-            <ClothTexturePreview swatch={selectedCloth} />
+            <button
+              type="button"
+              onClick={handleCycleWeightSort}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                weightSort !== 'archive'
+                  ? 'bg-[#18181D] border-[#C8A464] text-[#C8A464]'
+                  : 'bg-[#111114] border-[#F4F1EA]/15 text-[#F4F1EA] hover:border-[#F4F1EA]/40'
+              }`}
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              <span>{weightSortLabel}</span>
+            </button>
 
-            <div className="space-y-2">
-              <p className="text-xs text-[#C8A464]">
-                {selectedCloth.mill} · {selectedCloth.origin}
-              </p>
-              <h3 className="font-serif text-3xl text-[#F4F1EA]">{selectedCloth.name}</h3>
-              <p className="text-sm text-[#A19E95] leading-relaxed">
-                {selectedCloth.notes}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 py-5 border-y border-[#F4F1EA]/10 text-xs">
-              <div>
-                <p className="text-[#A19E95] mb-1">Composition</p>
-                <p className="text-[#F4F1EA] font-medium">{selectedCloth.composition}</p>
-              </div>
-              <div>
-                <p className="text-[#A19E95] mb-1">Weight</p>
-                <p className="text-[#F4F1EA] font-medium tabular-nums">
-                  {selectedCloth.weightGsm} g/m²
-                </p>
-              </div>
-              <div>
-                <p className="text-[#A19E95] mb-1">Recommended Season</p>
-                <p className="text-[#F4F1EA] font-medium">{selectedCloth.season}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-xs text-[#A19E95]">
-                Physical book swatch prepared ahead of your salon visit.
-              </p>
+            {hasActiveFilters && (
               <button
                 type="button"
-                onClick={() =>
-                  onCommissionCloth(`${selectedCloth.mill} — ${selectedCloth.name}`)
-                }
-                className="inline-flex items-center gap-2 px-6 py-3 text-xs font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium border border-[#F4F1EA]/15 text-[#A19E95] hover:text-[#F4F1EA] hover:border-[#F4F1EA]/40 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <span>Reserve Swatch for Fitting</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
               </button>
+            )}
+          </div>
+        </div>
+
+        {/* Multi-Dimensional Filter Controls */}
+        <div className="p-5 bg-[#111114] border border-[#F4F1EA]/10 space-y-4">
+          {/* Material Buttons */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3">
+            <span className="text-xs text-[#A19E95] w-20 shrink-0">Material</span>
+            <div
+              role="group"
+              aria-label="Filter fabrics by material"
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              {MATERIAL_FILTERS.map((material) => {
+                const active = materialFilter === material;
+                return (
+                  <button
+                    key={material}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setMaterialFilter(material)}
+                    className={`px-3.5 py-1.5 text-xs font-medium border transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer ${
+                      active
+                        ? 'bg-[#C8A464] text-[#09090B] border-[#C8A464]'
+                        : 'bg-[#09090B] text-[#A19E95] border-[#F4F1EA]/12 hover:text-[#F4F1EA] hover:border-[#F4F1EA]/30'
+                    }`}
+                  >
+                    {material}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Season Buttons */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3 pt-3 border-t border-[#F4F1EA]/8">
+            <span className="text-xs text-[#A19E95] w-20 shrink-0">Season</span>
+            <div
+              role="group"
+              aria-label="Filter fabrics by season"
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              {SEASON_FILTERS.map((season) => {
+                const active = seasonFilter === season;
+                return (
+                  <button
+                    key={season}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setSeasonFilter(season)}
+                    className={`px-3.5 py-1.5 text-xs font-medium border transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer ${
+                      active
+                        ? 'bg-[#C8A464] text-[#09090B] border-[#C8A464]'
+                        : 'bg-[#09090B] text-[#A19E95] border-[#F4F1EA]/12 hover:text-[#F4F1EA] hover:border-[#F4F1EA]/30'
+                    }`}
+                  >
+                    {season}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Weight Buttons */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3 pt-3 border-t border-[#F4F1EA]/8">
+            <span className="text-xs text-[#A19E95] w-20 shrink-0">Weight</span>
+            <div
+              role="group"
+              aria-label="Filter fabrics by weight"
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              {WEIGHT_FILTERS.map((tier) => {
+                const active = weightFilter === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setWeightFilter(tier.id)}
+                    className={`px-3.5 py-1.5 text-xs font-medium border transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer tabular-nums ${
+                      active
+                        ? 'bg-[#C8A464] text-[#09090B] border-[#C8A464]'
+                        : 'bg-[#09090B] text-[#A19E95] border-[#F4F1EA]/12 hover:text-[#F4F1EA] hover:border-[#F4F1EA]/30'
+                    }`}
+                  >
+                    {tier.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
+
+        {filteredCloths.length === 0 || !selectedCloth ? (
+          <div className="p-12 bg-[#111114] border border-[#F4F1EA]/10 text-center space-y-4">
+            <p className="font-serif text-2xl text-[#F4F1EA]">
+              No Cloth Bolts Match This Combination
+            </p>
+            <p className="text-sm text-[#A19E95] max-w-md mx-auto">
+              Adjust your material, season, or weight criteria to explore the full mill
+              library.
+            </p>
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="px-5 py-2.5 text-xs font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Swatch Selector List */}
+            <div className="lg:col-span-5 divide-y divide-[#F4F1EA]/10 border border-[#F4F1EA]/10 bg-[#111114]">
+              {filteredCloths.map((cloth) => {
+                const active = cloth.id === selectedCloth.id;
+                return (
+                  <button
+                    key={cloth.id}
+                    type="button"
+                    onClick={() => setSelectedClothId(cloth.id)}
+                    className={`w-full text-left p-5 flex items-center justify-between gap-4 transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-[#18181D] text-[#F4F1EA]'
+                        : 'hover:bg-[#151519] text-[#A19E95]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <span
+                        className="w-8 h-8 border border-[#F4F1EA]/20 shrink-0"
+                        style={{ backgroundColor: cloth.swatchHex }}
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0">
+                        <p className="font-serif text-xl text-[#F4F1EA] truncate">
+                          {cloth.name}
+                        </p>
+                        <p className="text-xs text-[#A19E95] truncate">
+                          {cloth.mill} · {cloth.materialCategory} · {cloth.season}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-mono tabular-nums text-[#C8A464] shrink-0">
+                      {cloth.weightGsm}g
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Cloth Dossier */}
+            <div className="lg:col-span-7 bg-[#111114] border border-[#F4F1EA]/10 p-7 md:p-9 space-y-6">
+              <ClothTexturePreview swatch={selectedCloth} />
+
+              <div className="space-y-2">
+                <p className="text-xs text-[#C8A464]">
+                  {selectedCloth.mill} · {selectedCloth.origin}
+                </p>
+                <h3 className="font-serif text-3xl text-[#F4F1EA]">{selectedCloth.name}</h3>
+                <p className="text-sm text-[#A19E95] leading-relaxed">
+                  {selectedCloth.notes}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 py-5 border-y border-[#F4F1EA]/10 text-xs">
+                <div>
+                  <p className="text-[#A19E95] mb-1">Composition</p>
+                  <p className="text-[#F4F1EA] font-medium">{selectedCloth.composition}</p>
+                </div>
+                <div>
+                  <p className="text-[#A19E95] mb-1">Weight</p>
+                  <p className="text-[#F4F1EA] font-medium tabular-nums">
+                    {selectedCloth.weightGsm} g/m²
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[#A19E95] mb-1">Recommended Season</p>
+                  <p className="text-[#F4F1EA] font-medium">{selectedCloth.season}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <p className="text-xs text-[#A19E95]">
+                  Physical book swatch prepared ahead of your salon visit.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onCommissionCloth(`${selectedCloth.mill} — ${selectedCloth.name}`)
+                  }
+                  className="inline-flex items-center gap-2 px-6 py-3 text-xs font-medium bg-[#C8A464] text-[#09090B] hover:bg-[#D7B67A] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <span>Reserve Swatch for Fitting</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
